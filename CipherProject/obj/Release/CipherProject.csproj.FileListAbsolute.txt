@@ -1,0 +1,16 @@
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\ResolveAssemblyReference.cache
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.Aboutme.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.CipherProject.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.LoginForm.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.MakeDir.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.Pass.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.ProgressWindow.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.Properties.Resources.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.SelectEditor.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.ViewForm.resources
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\GenerateResource.read.1.tlog
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\GenerateResource.write.1.tlog
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.exe
+D:\Ruslan\Temp\CipherProject\CipherProject\obj\Release\CipherProject.pdb
+D:\Ruslan\Temp\CipherProject\CipherProject\bin\Release\CipherProject.exe
+D:\Ruslan\Temp\CipherProject\CipherProject\bin\Release\CipherProject.pdb
