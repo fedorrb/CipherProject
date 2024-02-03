@@ -137,7 +137,7 @@ namespace CipherProject
             }
             else
             {
-                DialogResult result = MessageBox.Show("Файл существует, перезаписать?", "Перезаписать?",
+                DialogResult result = MessageBox.Show("File exists, overwrite?", "Overwrite?",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Yes)
                 {
@@ -160,6 +160,8 @@ namespace CipherProject
         /// <param name="fileList">список файлов</param>
         public void CopyListFiles(List<string> fileList, List<string> directoryList)
         {
+            if (pathFrom.Equals(pathTo) == true)
+                return;
             ObjectCopyFiles ocf = new ObjectCopyFiles();
             ocf.fileList.AddRange(fileList);
             if (fileList.Count > 0)
@@ -229,13 +231,13 @@ namespace CipherProject
         {
             if (Directory.Exists(sourceDirectory))
             {
-                DialogResult result = MessageBox.Show("Переместить папку " + sourceDirectory + " ?", "Переместить?",
+                DialogResult result = MessageBox.Show("Move folder " + sourceDirectory + " ?", "Move?",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Yes)
                 {
                     if (Directory.Exists(destDirectory))
                     {
-                        MessageBox.Show("Папка " + destDirectory + " уже существует");
+                        MessageBox.Show("Folder " + destDirectory + " already exists.");
                     }
                     else
                     {
@@ -257,7 +259,7 @@ namespace CipherProject
             }
             else
             {
-                DialogResult result = MessageBox.Show("Файл существует, перезаписать?", "Перезаписать?",
+                DialogResult result = MessageBox.Show("File exists, overwrite?", "Overwrite?",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Yes)
                 {
@@ -285,7 +287,7 @@ namespace CipherProject
                 StaticClass.cancel = false;
                 StaticClass.progressValue1 = 0;
                 StaticClass.progressValue2 = 0;
-                StaticClass.nameOperation = "Move files...";
+                StaticClass.nameOperation = "Moving files...";
                 StaticClass.progressMax1 = fileList.Count;
                 progressWindow = new ProgressWindow();
                 progressWindow.Show();
@@ -314,7 +316,7 @@ namespace CipherProject
                 StaticClass.cancel = false;
                 StaticClass.progressValue1 = 0;
                 StaticClass.progressValue2 = 0;
-                StaticClass.nameOperation = "Move directories...";
+                StaticClass.nameOperation = "Moving directories...";
                 StaticClass.progressMax1 = directoryList.Count;
                 progressWindow = new ProgressWindow();
                 progressWindow.Show();
@@ -345,7 +347,7 @@ namespace CipherProject
         {
             if (System.IO.Directory.Exists(nameDirectory))
             {
-                DialogResult result = MessageBox.Show("Удалить папку " + nameDirectory + " и все вложенные папки?", "Удалить?",
+                DialogResult result = MessageBox.Show("Delete folder " + nameDirectory + " and all subfolders?", "Delete?",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Yes)
                 {
@@ -395,7 +397,7 @@ namespace CipherProject
             if (fileList.Count > 0)
             {
                 string inFileFullName;//полное имя
-                DialogResult result = MessageBox.Show("Удалить выбранные файлы?", "Удалить?",
+                DialogResult result = MessageBox.Show("Delete selected files?", "Delete?",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (result == DialogResult.Yes)
                 {
@@ -491,7 +493,8 @@ namespace CipherProject
         #region Encrypt Decrypt
         private void EncryptFileRijndael(string inFileFullName, string hash, string inFile)
         {
-            //Использован пример Алексея Остапенко RSDN Magazine
+            if (isAutorized(inFileFullName) == false)
+                return;
             //Запомнить дату создания файла
             GetFileDates(inFileFullName);
             string inFileName;          //имя без полного пути
@@ -519,9 +522,7 @@ namespace CipherProject
             System.Security.AccessControl.DirectorySecurity sec = System.IO.Directory.GetAccessControl(pathTo);
             FileSystemAccessRule accRule = new FileSystemAccessRule(Environment.UserDomainName + "\\" + Environment.UserName, FileSystemRights.FullControl, AccessControlType.Allow);
             sec.AddAccessRule(accRule);
-
             FileStream instream = new FileStream(inFileFullName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            FileStream outstream = new FileStream(outFile, FileMode.Create, FileAccess.Write, FileShare.None);
             int buflen = ((2 << 16) / alg.BlockSize) * alg.BlockSize;
             byte[] inbuf = new byte[buflen];
             byte[] outbuf = new byte[buflen];
@@ -535,6 +536,7 @@ namespace CipherProject
             //progress bar
             StaticClass.progressMax2 = prohod;
             StaticClass.progressValue2 = 0;
+            FileStream outstream = new FileStream(outFile, FileMode.Create, FileAccess.Write, FileShare.None);
             while ((len = instream.Read(inbuf, 0, buflen)) == buflen)
             {
                 if ((StaticClass.progressValue2 == 0) && (addRandomBlock == 1))
@@ -568,8 +570,36 @@ namespace CipherProject
             }
         }
 
+        private bool isAutorized(string inFileFullName)
+        {
+            try
+            {
+                if (File.Exists(inFileFullName))
+                {
+                    FileSecurity fileSecurity = File.GetAccessControl(inFileFullName);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show($"Access denied for file: {inFileFullName}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error has occurred: " + ex.Message);
+                return false;
+            }
+            return true;
+        }
+
         private void EncryptFileThreeFish(string inFileFullName, string hash, string inFile)
         {
+            if (isAutorized(inFileFullName) == false)
+                return;
             //Запомнить дату создания файла
             GetFileDates(inFileFullName);
             PasswordDeriveBytes pdb = new PasswordDeriveBytes(hash, null); //класс, позволяющий генерировать ключи на базе паролей
@@ -751,7 +781,7 @@ namespace CipherProject
                 instream.Close();
                 outstream.Close();
                 System.IO.File.Delete(outFile);
-                MessageBox.Show("Файл зашифрован другим паролем", "Ошибка", MessageBoxButtons.OK);
+                MessageBox.Show("Error, incorrect password", "Error", MessageBoxButtons.OK);
             }
             finally
             {
@@ -854,7 +884,7 @@ namespace CipherProject
                 alg_threefish.Clear();
                 alg_threefish = null;
                 System.IO.File.Delete(outFile);
-                MessageBox.Show("Файл зашифрован другим паролем", "Ошибка", MessageBoxButtons.OK);
+                MessageBox.Show("Error, incorrect password", "Error", MessageBoxButtons.OK);
             }
             finally
             {

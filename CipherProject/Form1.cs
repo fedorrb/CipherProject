@@ -16,6 +16,13 @@ namespace CipherProject
 {
     public partial class CipherProject : Form
     {
+        public enum FileType
+        {
+            File,
+            Directory,
+            Unknown
+        }
+
         private stPath stPathFiles;//пути для зашифрованных и расшифрованных файлов
         private UserLogin userLogin = new UserLogin();//экземпляр класса аутентификации пользователя
         private string sPass; //пароль через событие
@@ -24,23 +31,32 @@ namespace CipherProject
         private NameListView activeListView;
         private string fileNameBefore;
         // константа для создания формы без кнопки закрытия
-        private const int CS_NOCLOSE = 0x200;
+        //private const int CS_NOCLOSE = 0x200;
         // Переопределение параметров создания формы.
         // Убрать кнопку закрытия окна.
+        /*
         protected override CreateParams CreateParams
         {
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ClassStyle = cp.ClassStyle | CS_NOCLOSE;
+                cp.ClassStyle |= CS_NOCLOSE;
                 return cp;
             }
         }
+        */
         ToolTip tips;
 
         public CipherProject()
         {
             InitializeComponent();
+
+            listLeft.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            listLeft.ForeColor = System.Drawing.Color.Black;
+            listRight.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            listRight.ForeColor = System.Drawing.Color.Black;
+
+            ResizeActionButton();
             stPathFiles = new stPath();
             stPathFiles.LoadIniFile();
             listLeft.SetSortOrder(stPathFiles.SortOrderLeft);
@@ -57,6 +73,7 @@ namespace CipherProject
             listLeft.LabelEdit = true;
             listRight.LabelEdit = true;
             AddEventListView();
+            ClearPassword();
         }
 
         private void CheckMenuItem()
@@ -86,7 +103,13 @@ namespace CipherProject
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Выйти из программы?", "Выход?",
+            ExitProgram();
+        }
+
+        private void ExitProgram()
+        {
+            ClearPassword();
+            DialogResult result = MessageBox.Show("Exit the program?", "Exit?",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
             if (result == DialogResult.Yes)
             {
@@ -124,19 +147,26 @@ namespace CipherProject
 
         private void CipherProject_Load(object sender, EventArgs e)
         {
-            ShowLoginForm();
-        }
-
-        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ShowLoginForm();
-            if (userLogin.IsLogin())//если имя и пароль соответствуют то разрешаем работу
+            sPass = String.Empty;
+            this.Activate();
+            this.buttonsPanel.Enabled = true;
+            this.splitContainer1.Enabled = true;
+            if (stPathFiles.OldLeftDir.Length > 0)
             {
-                this.buttonsPanel.Enabled = true;
-                this.splitContainer1.Enabled = true;
-                listLeft.FillList();
-                listRight.FillList();
+                listLeft.bottomText = stPathFiles.OldLeftDir;
+                listLeft.newFolder = stPathFiles.OldLeftDir;
+                listLeft.RefillList();
             }
+            else
+                listLeft.FillList();
+            if (stPathFiles.OldRightDir.Length > 0)
+            {
+                listRight.bottomText = stPathFiles.OldRightDir;
+                listRight.newFolder = stPathFiles.OldRightDir;
+                listRight.RefillList();
+            }
+            else
+                listRight.FillList();
         }
 
         private void ShowLoginForm()
@@ -152,33 +182,7 @@ namespace CipherProject
                     this.Activate();
                     sPass = ar.str;//получить пароль
                     ar.str = String.Empty;//очистка
-                    userLogin.Validate();//проверить введенные данные
-                    if (userLogin.IsLogin())//если имя и пароль соответствуют то разрешаем работу
-                    {
-                        this.buttonsPanel.Enabled = true;
-                        this.splitContainer1.Enabled = true;
-                        if (stPathFiles.OldLeftDir.Length > 0)
-                        {
-                            listLeft.bottomText = stPathFiles.OldLeftDir;
-                            listLeft.newFolder = stPathFiles.OldLeftDir;
-                            listLeft.RefillList();
-                        }
-                        else
-                            listLeft.FillList();
-                        if (stPathFiles.OldRightDir.Length > 0)
-                        {
-                            listRight.bottomText = stPathFiles.OldRightDir;
-                            listRight.newFolder = stPathFiles.OldRightDir;
-                            listRight.RefillList();
-                        }
-                        else
-                            listRight.FillList();
-                    }
-                    else
-                    {
-                        this.buttonsPanel.Enabled = false;
-                        this.splitContainer1.Enabled = false;
-                    }
+                    menuStrip1.Items[2].Enabled = true;
                 }
             };
             //показать форму аутентификации
@@ -189,8 +193,7 @@ namespace CipherProject
         {
             if (userLogin.IsLogin())//если имя и пароль соответствуют то разрешаем работу
             {
-                Pass changePass = new Pass();
-                changePass.ShowDialog();
+                //
             }
         }
 
@@ -260,18 +263,18 @@ namespace CipherProject
             Button b = (Button)(sender);
             System.IO.DriveInfo drv = new System.IO.DriveInfo(b.Text.ToString());
             StringBuilder diskInfo = new StringBuilder();
-            diskInfo.AppendLine("Диск: " + drv.Name);
-            diskInfo.AppendLine("Тип диска: " + drv.DriveType.ToString());
-            diskInfo.AppendLine("Файловая система: " + drv.DriveFormat.ToString());
+            diskInfo.AppendLine("Drive: " + drv.Name);
+            diskInfo.AppendLine("DriveType: " + drv.DriveType.ToString());
+            diskInfo.AppendLine("File system: " + drv.DriveFormat.ToString());
             long freeSpaceMB = (long)(drv.AvailableFreeSpace / (1024 * 1024));
             if (freeSpaceMB < 8192)
             {
-                diskInfo.AppendLine("Свободное место на диске: " + freeSpaceMB.ToString() + " MB");
+                diskInfo.AppendLine("Free disk space: " + freeSpaceMB.ToString() + " MB");
             }
             else
             {
                 long freeSpaceGb = (long)(freeSpaceMB / 1024);
-                diskInfo.AppendLine("Свободное место на диске: " + freeSpaceGb.ToString() + " GB");
+                diskInfo.AppendLine("Free disk space: " + freeSpaceGb.ToString() + " GB");
             }
 
             tips.SetToolTip((Button)sender, diskInfo.ToString());
@@ -291,8 +294,7 @@ namespace CipherProject
         private void listView_BeforeLabelEdit(object sender, LabelEditEventArgs e)
         {
             var plv = (PanelListView)sender;
-            if (plv.Items[e.Item].SubItems[0].Text.ToUpper().Equals
-                (plv.Items[e.Item].SubItems[0].Text) == false)
+            if (GetFileType(plv.bottomText + plv.FocusedItem.SubItems[0].Text) == FileType.File)
             {
                 fileNameBefore = plv.Items[e.Item].SubItems[0].Text;
             }
@@ -341,27 +343,45 @@ namespace CipherProject
 
         private void listLeft_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Escape)
+            {
+                ExitProgram();
+            }
             if (e.KeyCode == Keys.F9)
             {
-                listRight.GetCursorOnFile();
-                listLeft.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.EncryptListFiles(listLeft.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
-                listRight.RefillList();
-                listLeft.RefillList();
-                listRight.SetCursorOnFile();
-                listLeft.SetCursorOnFile();
+                if (CheckPass())
+                {
+                    listRight.GetCursorOnFile();
+                    listLeft.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.EncryptListFiles(listLeft.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
+                    listRight.RefillList();
+                    listLeft.RefillList();
+                    listRight.SetCursorOnFile();
+                    listLeft.SetCursorOnFile();
+                }
+                else
+                {
+                    MessageBox.Show("This operatins needs a password.", "Encrypting canceled!");
+                }
             }
             if (e.KeyCode == Keys.F10)
             {
-                listRight.GetCursorOnFile();
-                listLeft.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.DecryptListFiles(listLeft.GetSelectedFiles(), sPass);
-                listRight.RefillList();
-                listLeft.RefillList();
-                listRight.SetCursorOnFile();
-                listLeft.SetCursorOnFile();
+                if (CheckPass())
+                {
+                    listRight.GetCursorOnFile();
+                    listLeft.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.DecryptListFiles(listLeft.GetSelectedFiles(), sPass);
+                    listRight.RefillList();
+                    listLeft.RefillList();
+                    listRight.SetCursorOnFile();
+                    listLeft.SetCursorOnFile();
+                }
+                else
+                {
+                    MessageBox.Show("This operatins needs a password.", "Decrypting canceled!");
+                }
             }
             if (e.KeyCode == Keys.F5)
             {
@@ -405,31 +425,58 @@ namespace CipherProject
                 listRight.SetCursorOnFile();
                 listLeft.SetCursorOnFile();
             }
+            if (e.KeyCode == Keys.F2)
+            {
+                ClearPassword();
+            }
+            if(e.KeyCode == Keys.F1)
+            {
+                Aboutme aboutMe = new Aboutme();
+                aboutMe.ShowDialog();
+            }
         }
 
         private void listRight_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Escape)
+            {
+                ExitProgram();
+            }
             if (e.KeyCode == Keys.F9)
             {
-                listLeft.GetCursorOnFile();
-                listRight.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.EncryptListFiles(listRight.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
-                listLeft.RefillList();
-                listRight.RefillList();
-                listLeft.SetCursorOnFile();
-                listRight.SetCursorOnFile();
+                if (CheckPass())
+                {
+                    listLeft.GetCursorOnFile();
+                    listRight.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.EncryptListFiles(listRight.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
+                    listLeft.RefillList();
+                    listRight.RefillList();
+                    listLeft.SetCursorOnFile();
+                    listRight.SetCursorOnFile();
+                }
+                else
+                {
+                    MessageBox.Show("This operatins needs a password.", "Encrypting canceled!");
+                }
             }
             if (e.KeyCode == Keys.F10)
             {
-                listLeft.GetCursorOnFile();
-                listRight.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.DecryptListFiles(listRight.GetSelectedFiles(), sPass);
-                listLeft.RefillList();
-                listRight.RefillList();
-                listLeft.SetCursorOnFile();
-                listRight.SetCursorOnFile();
+                if (CheckPass())
+                {
+                    listLeft.GetCursorOnFile();
+                    listRight.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.DecryptListFiles(listRight.GetSelectedFiles(), sPass);
+                    listLeft.RefillList();
+                    listRight.RefillList();
+                    listLeft.SetCursorOnFile();
+                    listRight.SetCursorOnFile();
+                }
+                else
+                {
+                    MessageBox.Show("This operatins needs a password.", "Decrypting canceled!");
+                }
             }
             if (e.KeyCode == Keys.F5)
             {
@@ -473,8 +520,16 @@ namespace CipherProject
                 listLeft.SetCursorOnFile();
                 listRight.SetCursorOnFile();
             }
+            if (e.KeyCode == Keys.F2)
+            {
+                ClearPassword();
+            }
+            if (e.KeyCode == Keys.F1)
+            {
+                Aboutme aboutMe = new Aboutme();
+                aboutMe.ShowDialog();
+            }
         }
-
         private void listLeft_SelectedIndexChanged(object sender, EventArgs e)
         {
             textBoxLeft.Text = listLeft.bottomText.ToString();
@@ -566,53 +621,67 @@ namespace CipherProject
         
         private void encodingBtn_Click(object sender, EventArgs e)
         {
-            if (activeListView == NameListView.left)
+            if (CheckPass())
             {
-                listRight.GetCursorOnFile();
-                listLeft.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.EncryptListFiles(listLeft.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
-                listRight.RefillList();
-                listLeft.RefillList();
-                listRight.SetCursorOnFile();
-                listLeft.SetCursorOnFile();
+                if (activeListView == NameListView.left)
+                {
+                    listRight.GetCursorOnFile();
+                    listLeft.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.EncryptListFiles(listLeft.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
+                    listRight.RefillList();
+                    listLeft.RefillList();
+                    listRight.SetCursorOnFile();
+                    listLeft.SetCursorOnFile();
+                }
+                else
+                {
+                    listLeft.GetCursorOnFile();
+                    listRight.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.EncryptListFiles(listRight.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
+                    listLeft.RefillList();
+                    listRight.RefillList();
+                    listLeft.SetCursorOnFile();
+                    listRight.SetCursorOnFile();
+                }
             }
             else
             {
-                listLeft.GetCursorOnFile();
-                listRight.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.EncryptListFiles(listRight.GetSelectedFiles(), sPass, stPathFiles.CryptoAlgoritm);
-                listLeft.RefillList();
-                listRight.RefillList();
-                listLeft.SetCursorOnFile();
-                listRight.SetCursorOnFile();
+                MessageBox.Show("This operatins needs a password.", "Encrypting canceled!");
             }
         }
         
         private void decodingBtn_Click(object sender, EventArgs e)
         {
-            if (activeListView == NameListView.left)
+            if (CheckPass())
             {
-                listRight.GetCursorOnFile();
-                listLeft.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.DecryptListFiles(listLeft.GetSelectedFiles(), sPass);
-                listRight.RefillList();
-                listLeft.RefillList();
-                listRight.SetCursorOnFile();
-                listLeft.SetCursorOnFile();
+                if (activeListView == NameListView.left)
+                {
+                    listRight.GetCursorOnFile();
+                    listLeft.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listLeft.bottomText, listRight.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.DecryptListFiles(listLeft.GetSelectedFiles(), sPass);
+                    listRight.RefillList();
+                    listLeft.RefillList();
+                    listRight.SetCursorOnFile();
+                    listLeft.SetCursorOnFile();
+                }
+                else
+                {
+                    listLeft.GetCursorOnFile();
+                    listRight.GetCursorOnFile();
+                    FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
+                    fo.DecryptListFiles(listRight.GetSelectedFiles(), sPass);
+                    listLeft.RefillList();
+                    listRight.RefillList();
+                    listLeft.SetCursorOnFile();
+                    listRight.SetCursorOnFile();
+                }
             }
             else
             {
-                listLeft.GetCursorOnFile();
-                listRight.GetCursorOnFile();
-                FileOperation fo = new FileOperation(listRight.bottomText, listLeft.bottomText, stPathFiles.SignDelete, stPathFiles.AddRandomBlock);
-                fo.DecryptListFiles(listRight.GetSelectedFiles(), sPass);
-                listLeft.RefillList();
-                listRight.RefillList();
-                listLeft.SetCursorOnFile();
-                listRight.SetCursorOnFile();
+                MessageBox.Show("This operatins needs a password.", "Decrypting canceled!");
             }
         }
         
@@ -677,8 +746,10 @@ namespace CipherProject
         /// </summary>
         private void programForEditToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SelectEditor selectProg = new SelectEditor();
-            selectProg.pathToEditor = stPathFiles.ProgForEditing;
+            SelectEditor selectProg = new SelectEditor
+            {
+                pathToEditor = stPathFiles.ProgForEditing
+            };
             if (selectProg.ShowDialog() == DialogResult.OK)
             {
                 stPathFiles.ProgForEditing = selectProg.pathToEditor;
@@ -705,14 +776,18 @@ namespace CipherProject
         {
             if (activeListView == NameListView.left)
             {
-                ViewForm viewForm = new ViewForm();
-                viewForm.viewFileName = listLeft.GetFocusedFile();
+                ViewForm viewForm = new ViewForm
+                {
+                    viewFileName = listLeft.GetFocusedFile()
+                };
                 viewForm.Show();
             }
             else
             {
-                ViewForm viewForm = new ViewForm();
-                viewForm.viewFileName = listRight.GetFocusedFile();
+                ViewForm viewForm = new ViewForm
+                {
+                    viewFileName = listRight.GetFocusedFile()
+                };
                 viewForm.Show();
             }
         }
@@ -764,5 +839,91 @@ namespace CipherProject
                 listRight.RefillList();
             }
         }
-     }
+
+        private void versionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            aboutToolStripMenuItem_Click(sender, e);
+        }
+
+
+        public void ResizeActionButton()
+        {
+            int posX = 0;
+            int buttonSizeX = buttonsPanel.Size.Width / buttonsPanel.Controls.Count;
+            foreach (Control btn in buttonsPanel.Controls)
+            {
+                if (btn.GetType() == typeof(Button))
+                {
+                    btn.Size = new Size(buttonSizeX, buttonsPanel.Size.Height);
+                    btn.Location = new Point(posX, 0);
+                    posX += buttonSizeX;
+                }
+            }
+        }
+
+        private void CipherProject_SizeChanged(object sender, EventArgs e)
+        {
+            ResizeActionButton();
+        }
+
+        private void changeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowLoginForm();
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClearPassword();
+        }
+
+        private void ClearPassword()
+        {
+            if (sPass != null)
+            {
+                sPass = String.Empty;
+            }
+            else
+            {
+                sPass = String.Empty;
+            }
+            menuStrip1.Items[2].Enabled = false;
+        }
+
+        private bool CheckPass()
+        {
+            bool result = false;
+            if (sPass == null)
+                sPass = String.Empty;
+            if (sPass.Length == 0)
+            {
+                ShowLoginForm();
+            }
+            if (sPass.Length != 0)
+            {
+                result = true;
+            }
+            return result;
+        }
+
+        public static FileType GetFileType(string path)
+        {
+            if (File.Exists(path))
+            {
+                return FileType.File;
+            }
+            else if (Directory.Exists(path))
+            {
+                return FileType.Directory;
+            }
+            else
+            {
+                return FileType.Unknown;
+            }
+        }
+
+        private void changePasswordToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            ClearPassword();
+        }
+    }
 }

@@ -20,6 +20,8 @@ namespace CipherProject
 
         public AppEvents evt = new AppEvents(); //событие
 
+        private TextBox currentTextBox;//текущее поле для ввода пароля
+        
         private const int CS_NOCLOSE = 0x200;
         /// <summary>
         /// Переопределение параметров создания формы.
@@ -38,6 +40,7 @@ namespace CipherProject
         public LoginForm()
         {
             InitializeComponent();
+            currentTextBox = textBoxPass;
             uLogin = new UserLogin();
             masOfSimvol = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgijklmnopqrstuvwxyz1234567890" +  
                 @"`~!@#$%^*()_+|-=\[]{};:'/?.,<>";
@@ -57,22 +60,37 @@ namespace CipherProject
 
         private void button1_Click(object sender, EventArgs e)
         {
-            uLogin.SetPass(textBox2.Text);
+            uLogin.SetPass("");
             //событие возвращает значение из LoginForm в Form1
-            evt.OnStringEvt(textBox3.Text); //вызов события
-            this.Close();
+            evt.OnStringEvt(textBoxPass.Text); //вызов события
+            if (EqualPass())
+            {
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Password does not match! Re-enter your password.");
+                textBoxPass.Text = "";
+                textBoxPassConf.Text = "";
+                textBoxPass.Focus();
+            }
         }
 
-        private void textBox2_KeyDown(object sender, KeyEventArgs e)
+        private bool EqualPass()
         {
-            if (e.KeyCode == Keys.Enter)
-                SelectNextControl(textBox2, true, true, false, true);
+            return textBoxPass.Text.Equals(textBoxPassConf.Text);
         }
 
-        private void textBox3_KeyDown(object sender, KeyEventArgs e)
+        private void textBoxPassConf_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
                 button1_Click(sender, e);
+        }
+
+        private void textBoxPass_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                textBoxPassConf.Focus();
         }
 
         private void LoginForm_Load(object sender, EventArgs e)
@@ -86,16 +104,19 @@ namespace CipherProject
         /// <param name="e"></param>
         private void ButtonsClick(object sender, EventArgs e)
         {
-            string str = textBox3.Text;
+            string str = textBoxPass.Text;
             Button b = (Button)(sender);
-            textBox3.Text += b.Text.ToString();
+            currentTextBox.Text += b.Text.ToString();
+            currentTextBox.Focus();            
         }
         /// <summary>
-        /// нарисовать кнопки с символами, добавить кнопки
+        /// нарисовать кнопки с кодировками, добавить кнопки
         /// на panel1 и определить событие Click
         /// </summary>
         private void CreateButtons()
         {
+            int btnWidth = panel1.Size.Width / 12;
+            int btnHeight = panel1.Size.Height / 10;
             for (int i = 161; i < 190; i++)
             {
                 char specialChar = Convert.ToChar(i);
@@ -111,8 +132,8 @@ namespace CipherProject
                         break;
                     }
                     Button bt1 = new Button();
-                    bt1.Size = new Size(39, 35);
-                    bt1.Location = new Point(j * 39, i * 35);
+                    bt1.Size = new Size(btnWidth, btnHeight);
+                    bt1.Location = new Point(j * btnWidth, i * btnHeight);
                     bt1.TabStop = false;
                     bt1.FlatStyle = FlatStyle.Standard;
                     bt1.Text = masOfSimvol[k].ToString();
@@ -121,5 +142,16 @@ namespace CipherProject
                     k++;
                 }
         }
+
+        private void textBoxPass_Enter(object sender, EventArgs e)
+        {
+            currentTextBox = textBoxPass;
+        }
+
+        private void textBoxPassConf_Enter(object sender, EventArgs e)
+        {
+            currentTextBox = textBoxPassConf;
+        }
+
     }
 }

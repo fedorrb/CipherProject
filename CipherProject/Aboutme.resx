@@ -118,17 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox1.Text" xml:space="preserve">
-    <value>CIPHER PROJECT
+    <value>EncryptEasy - File Manager with File Encryption
 
-Файловый менеджер с функцией шифрования.
-Версия 2.7.2 от 28.07.2015
+Version 1.0.0
 
-Вы можете использовать программу на свой страх и риск.
-Пароль на вход в программу - sfm
-Меняется через пункт меню.
-Пароль для шифрования любой, какой придумаете.
-Пароль для шифрования нигде не сохраняется.
-Если Вы его забудете, то зашифрованные данные будут недоступны.
-</value>
+EncryptEasy is a feature-packed file manager that provides file encryption capabilities, ensuring the security and privacy of your sensitive data.
+With an intuitive interface and a wide range of functionalities, EncryptEasy empowers you to manage your files efficiently while keeping them protected.
+
+Key Features:
+    Dual-pane interface for easy navigation and file management.
+    File system navigation to explore and access your files and folders.
+    Copy, move, and delete files and folders with ease.
+    Create new folders to organize your files effectively.
+    View files within the program.
+    Open files with external editors for seamless editing.
+    Encrypt and decrypt files using the Rijndael algorithm with a 256-bit key length.
+    Encrypt and decrypt files using the ThreeFish algorithm with a 1024-bit key length.
+    Convenient password input using a mouse, resistant to keyloggers.
+
+About the Encryption Algorithms:
+    Rijndael was selected as the encryption standard by the U.S. government through the AES competition.
+    Threefish is a symmetric-key block cipher that was one of the components of the Skein hash function, which was a candidate in the NIST hash function competition.
+    To date, no successful attacks against the Rijndael and ThreeFish encryption algorithms are known.
+    Both algorithms have been thoroughly studied and analyzed by experts in the field, and no practical vulnerabilities or weaknesses have been identified.
+
+Special Features:
+    The option to invert the first data block before encryption is available for the Rijndael algorithm.
+    This helps prevent identical initial data sequences for files with the same headers.
+
+Disclaimer:
+    The program has undergone extensive testing on various file sets.
+
+    Importantly, EncryptEasy does not collect any user data whatsoever. Your files and personal information remain private and secure.
+    However, any actions you take with this program based on the provided information are solely at your own risk and responsibility.
+    I am not liable for any losses, damages, or adverse consequences arising from the use of this program.
+    Please exercise caution and make decisions based on your own discretion and informed judgment.
+
+You are also responsible for choosing and remembering encryption passwords responsibly. If you forget them, you will be unable to decrypt your files.</value>
   </data>
 </root>

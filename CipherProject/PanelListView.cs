@@ -21,11 +21,8 @@ namespace CipherProject
             private int sortOrder;
             private enum SortDirection { ascending, descending }
             private SortDirection sortDirection;
-            private Font newFont; //шрифт для выделенных файлов
-            private Font oldFont;
-            private Color newColor;//цвет для отсортированной колонки
-            private Color oldColor;
-            private Color oldBackColor; //цвет фона в системе
+            private Font newFontBold; //шрифт для выделенных файлов
+            private Font oldFontRegular;
             private string position;
             private int widthColumnName;
             private int widthColumnExt;
@@ -37,10 +34,10 @@ namespace CipherProject
             //********** конструктор ***************
             public PanelListView()
             {
-                widthColumnName = 240;
+                widthColumnName = 200;
                 widthColumnExt = 50;
-                widthColumnDate = 80;
-                widthColumnSize = 85;
+                widthColumnDate = 95;
+                widthColumnSize = 130;
                 sortOrder = 0;
                 bottomText = String.Empty;
                 newFolder = String.Empty;
@@ -48,20 +45,24 @@ namespace CipherProject
                 pathToEditorProg = String.Empty;
                 selectedFiles = new List<string>();
                 selectedDirectories = new List<string>();
-                oldFont = this.Font;
-                newFont = new Font(oldFont, oldFont.Style | FontStyle.Bold);
-                oldColor = this.ForeColor;
-                newColor = Color.Indigo;//DarkGreen;
-                oldBackColor = SystemColors.Window;
+                oldFontRegular = new System.Drawing.Font("Calibri", 12, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+                newFontBold = new Font(oldFontRegular, oldFontRegular.Style | FontStyle.Bold);
+
+                this.ForeColor = Color.Black;
+
                 this.DoubleClick += listView_DoubleClick;
                 this.ColumnClick += listView_ColumnClick;
                 this.MouseClick += listView_MouseClick;
                 this.KeyDown += listView_KeyDown;
                 this.SizeChanged += listView_SizeChanged;
+
+                this.FullRowSelect = true;
+
                 ResizeColumns();
                 sortDirection = SortDirection.ascending;
                 selFiles = new List<string>();
             }
+
             #region Fields Metods
             //**************************************
             /// <summary>
@@ -216,37 +217,68 @@ namespace CipherProject
             /// <summary>
             /// заполнить ListView списком папок
             /// </summary>
-            private void FoldersToList()
+            private bool FoldersToList()
             {
                 System.IO.FileAttributes fileattr;
+                System.IO.DirectoryInfo[] folders = null;
                 if (System.IO.Directory.Exists(newFolder))
                 {
-                    this.BeginUpdate();
-                    this.Items.Clear();
-                    //получить список каталогов
-                    System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(newFolder);
-                    System.IO.DirectoryInfo[] folders = di.GetDirectories();
-                    //отсортировать по имени
-                    var querySortDirectories =
-                        from d in folders
-                        orderby d.FullName
-                        select d;
-
-                    this.Items.Add(@"\...");
-                    ListViewItem lvi = new ListViewItem();
-                    foreach (var item in querySortDirectories)
+                    try
                     {
-                        fileattr = item.Attributes;
-                        //добавить папки в список кроме скрытых
-                        if ((fileattr & System.IO.FileAttributes.Hidden) != System.IO.FileAttributes.Hidden)
+                        //получить список каталогов
+                        System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(newFolder);
+                        folders = di.GetDirectories();
+                        //отсортировать по имени
+                        var querySortDirectories =
+                            from d in folders
+                            orderby d.FullName
+                            select d;
+
+                        this.BeginUpdate();
+                        this.Items.Clear();
+                        this.Items.Add(@"\...");
+                        ListViewItem lvi = new ListViewItem();
+                        foreach (var item in querySortDirectories)
                         {
-                            lvi = this.Items.Add(item.ToString().ToUpper());
-                            if (sortOrder == 0)
-                                lvi.ForeColor = newColor;
+                            fileattr = item.Attributes;
+                            //добавить папки в список кроме скрытых
+                            if ((fileattr & System.IO.FileAttributes.Hidden) != System.IO.FileAttributes.Hidden)
+                            {
+                                lvi = this.Items.Add(item.ToString().ToUpper());
+                                if (sortOrder == 0) //Name
+                                {
+                                    //lvi.ForeColor = folderColor;
+                                }
+                                else
+                                {
+                                    //lvi.ForeColor = folderColor;
+                                }
+                            }
                         }
+                        this.EndUpdate();
                     }
-                    this.EndUpdate();
+                    catch (UnauthorizedAccessException)
+                    {
+                        MessageBox.Show("\"" + newFolder + "\" folder access denied.");
+                        return false;
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        MessageBox.Show("Folder " + newFolder + " not found.");
+                        return false;
+                    }
+                    catch (IOException ex)
+                    {
+                        MessageBox.Show("I/O error: " + ex.Message);
+                        return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("An error has occurred: " + ex.Message);
+                        return false;
+                    }
                 }
+                return true;
             }
             /// <summary>
             /// заполнить ListView списком файлов
@@ -354,21 +386,33 @@ namespace CipherProject
                         {
                             //lvi = this1.Items.Add(item.FullName.ToLower());
                             lvi = this.Items.Add(item.Name.ToLower());
-                            if(sortOrder == 0)
-                                lvi.ForeColor = newColor;
+                            if (sortOrder == 0)
+                            {
+                                //lvi.ForeColor = fileColorNavy;
+                            }
+                            else
+                            {
+                                //lvi.ForeColor = fileColorNavy;
+                            }
+                                
                             lvi.UseItemStyleForSubItems = false;
+                            lvi.SubItems.Add(item.Extension.ToString().ToLower());
+                            lvi.SubItems.Add(item.LastWriteTime.ToShortDateString());
+                            lvi.SubItems.Add(item.Length.ToString().ToLower());
+                            /*
                             if(sortOrder == 1)
-                                lvi.SubItems.Add(item.Extension.ToString().ToLower(), newColor, oldBackColor, Font);
+                                lvi.SubItems.Add(item.Extension.ToString().ToLower(), sortedColorBlue, oldBackColor, Font);
                             else
                                 lvi.SubItems.Add(item.Extension.ToString().ToLower());
                             if(sortOrder == 2)
-                                lvi.SubItems.Add(item.LastWriteTime.ToShortDateString(), newColor, oldBackColor, Font);
+                                lvi.SubItems.Add(item.LastWriteTime.ToShortDateString(), sortedColorBlue, oldBackColor, Font);
                             else
                                 lvi.SubItems.Add(item.LastWriteTime.ToShortDateString());
                             if(sortOrder == 3)
-                                lvi.SubItems.Add(item.Length.ToString().ToLower(), newColor, oldBackColor, Font);
+                                lvi.SubItems.Add(item.Length.ToString().ToLower(), sortedColorBlue, oldBackColor, Font);
                             else
                                 lvi.SubItems.Add(item.Length.ToString().ToLower());
+                            */
                         }
                     }
                     this.EndUpdate();
@@ -389,7 +433,7 @@ namespace CipherProject
                         lvi = this.FindItemWithText(item);
                         //добавить проверку
                         lvi.UseItemStyleForSubItems = false;
-                        lvi.Font = newFont;
+                        lvi.Font = newFontBold;
                     }
                 }
             }
@@ -428,6 +472,7 @@ namespace CipherProject
                     }
                 }
                 position = String.Empty;
+                ResizeColumns();
             }
             /// <summary>
             /// отсортировать файлы в ListView
@@ -491,8 +536,10 @@ namespace CipherProject
                     DriveToList();
                 else
                 {
-                    FoldersToList();
-                    FilesToList();
+                    if(FoldersToList())
+                        FilesToList();
+                    else
+                        return;
                 }
                 if (System.IO.Directory.Exists(newFolder))
                 {
@@ -515,8 +562,10 @@ namespace CipherProject
                 }
                 else
                 {
-                    FoldersToList();
-                    FilesToList();
+                    if (FoldersToList())
+                        FilesToList();
+                    else
+                        return;
                 }
                 if (System.IO.Directory.Exists(newFolder))
                 {
@@ -531,8 +580,8 @@ namespace CipherProject
             private void listView_DoubleClick(object sender, EventArgs e)
             {
                 if (this.FocusedItem != null)
-                    if (this.FocusedItem.SubItems[0].Text.ToUpper().Equals
-                        (this.FocusedItem.SubItems[0].Text) == false)
+                {
+                    if(GetFileType(bottomText + this.FocusedItem.SubItems[0].Text) == FileType.File)
                     {
                         //выполнить файл
                         FileOperation fo = new FileOperation(this.bottomText, this.bottomText, 0, 0);
@@ -542,6 +591,7 @@ namespace CipherProject
                     {
                         FillList();
                     }
+                }
             }
             //**************************************
             private void listView_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -576,18 +626,26 @@ namespace CipherProject
                 if (e.Button == MouseButtons.Right)
                 {
                     this.FocusedItem.UseItemStyleForSubItems = false;
-                    if (this.FocusedItem.Font == newFont)
+                    if (this.FocusedItem.Font == newFontBold)
                     {
-                        //удалить файл из списка выбанных файлов
+                        //удалить из списка выбанных файлов
                         selectedFiles.Remove(this.FocusedItem.SubItems[0].Text);
-                        this.FocusedItem.Font = oldFont;
+                        this.FocusedItem.Font = oldFontRegular;
+                        if (this.FocusedItem.SubItems[0].Text.ToUpper().Equals(this.FocusedItem.SubItems[0].Text) == false)
+                        {
+                            //this.FocusedItem.ForeColor = fileColorNavy;
+                        }
+                        else
+                        {
+                            //this.FocusedItem.ForeColor = folderColor;
+                        }
                     }
                     else
                     {
                         //добавить выделенный файл в список
                         selectedFiles.Add(this.FocusedItem.SubItems[0].Text);
                         //перерисовать жирным шрифтом
-                        this.FocusedItem.Font = newFont;
+                        this.FocusedItem.Font = newFontBold;
                     }
                 }
             }
@@ -599,12 +657,20 @@ namespace CipherProject
                 if (e.KeyCode == Keys.Insert)
                 {
                     this.FocusedItem.UseItemStyleForSubItems = false;
-                    if (this.FocusedItem.Font == newFont)
+                    if (this.FocusedItem.Font == newFontBold)
                     {
                         //удалить файл из списка выбанных файлов
                         selectedFiles.Remove(this.FocusedItem.SubItems[0].Text);
                         selectedDirectories.Remove(this.FocusedItem.SubItems[0].Text);
-                        this.FocusedItem.SubItems[0].Font = oldFont;
+                        this.FocusedItem.SubItems[0].Font = oldFontRegular;
+                        if (this.FocusedItem.SubItems[0].Text.ToUpper().Equals(this.FocusedItem.SubItems[0].Text) == false)
+                        {
+                            //this.FocusedItem.ForeColor = fileColorNavy;
+                        }
+                        else
+                        {
+                            //this.FocusedItem.ForeColor = folderColor;
+                        }
                     }
                     else
                     {
@@ -621,7 +687,7 @@ namespace CipherProject
                                 selectedDirectories.Add(this.FocusedItem.SubItems[0].Text);
                             }
                             //перерисовать жирным шрифтом
-                            this.FocusedItem.SubItems[0].Font = newFont;
+                            this.FocusedItem.SubItems[0].Font = newFontBold;
                         }
                     }
                     listView1Pos = this.Items.IndexOf(this.FocusedItem) + 1;
@@ -632,19 +698,39 @@ namespace CipherProject
                         this.Items[listView1Pos].Selected = true;
                         this.Items[listView1Pos].Focused = true;
                     }
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 //отменить выделение
                 if (e.KeyCode == Keys.Subtract)
                 {
-                    //newFont = new Font(oldFont, oldFont.Style & ~FontStyle.Bold);
+                    /*
+                    this.ForeColor = fileColorNavy;
                     for (int i = 0; i < this.Items.Count; i++)
-                        this.Items[i].SubItems[0].Font = oldFont;
+                    {
+                        this.Items[i].SubItems[0].Font = oldFontRegular;
+
+                        if (this.Items[i].SubItems[0].Text.ToUpper().Equals
+                            (this.Items[i].SubItems[0].Text) == false)
+                        {
+                            this.ForeColor = fileColorNavy;
+                            this.Items[i].SubItems[0].ForeColor = fileColorNavy;
+                        }
+                        else
+                        {
+                            this.ForeColor = folderColor;
+                            this.Items[i].SubItems[0].ForeColor = folderColor;
+                        }
+                    }
                     selectedFiles.Clear();
                     selectedDirectories.Clear();
+                    */
+                    RefillList();
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 //выделить все файлы
                 if (e.KeyCode == Keys.Add)
                 {
+                    //this.ForeColor = selectedColorBrown;
                     selectedFiles.Clear();
                     for (int i = 0; i < this.Items.Count; i++)
                     {
@@ -652,10 +738,11 @@ namespace CipherProject
                         if (this.Items[i].SubItems[0].Text.ToUpper().Equals
                             (this.Items[i].SubItems[0].Text) == false)
                         {
-                            this.Items[i].SubItems[0].Font = newFont;
+                            this.Items[i].SubItems[0].Font = newFontBold;
                             selectedFiles.Add(this.Items[i].SubItems[0].Text);
                         }
                     }
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 //выделить все зашифрованные файлы
                 if (e.KeyCode == Keys.Multiply)
@@ -670,14 +757,15 @@ namespace CipherProject
                                 (this.Items[i].SubItems[0].Text.EndsWith("rjn")) ||
                                 (this.Items[i].SubItems[0].Text.EndsWith("trf")))
                             {
-                                this.Items[i].SubItems[0].Font = newFont;
+                                this.Items[i].SubItems[0].Font = newFontBold;
                                 selectedFiles.Add(this.Items[i].SubItems[0].Text);
                             }
                             else
                             {
-                                this.Items[i].SubItems[0].Font = oldFont;
+                                this.Items[i].SubItems[0].Font = oldFontRegular;
                             }
                     }
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 //выделить все не зашифрованные файлы
                 if (e.KeyCode == Keys.Divide)
@@ -692,15 +780,16 @@ namespace CipherProject
                                 (this.Items[i].SubItems[0].Text.EndsWith("rjn")) ||
                                 (this.Items[i].SubItems[0].Text.EndsWith("trf")))
                             {
-                                this.Items[i].SubItems[0].Font = oldFont;
+                                this.Items[i].SubItems[0].Font = oldFontRegular;
                                 continue;
                             }
                             else
                             {
-                                this.Items[i].SubItems[0].Font = newFont;
+                                this.Items[i].SubItems[0].Font = newFontBold;
                                 selectedFiles.Add(this.Items[i].SubItems[0].Text);
                             }
                     }
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Return)
                 {
@@ -734,6 +823,7 @@ namespace CipherProject
                         }
                         else
                             FillList();
+                    e.Handled = e.SuppressKeyPress = true;
                 }
                 if (e.KeyCode == Keys.F3)
                 {
@@ -844,9 +934,9 @@ namespace CipherProject
                 sumWidthColumns = widthColumnName + widthColumnExt + widthColumnDate + widthColumnSize;
                 if (this.Size.Width > sumWidthColumns)
                 {
-                    this.Columns[1].Width = 50;
-                    this.Columns[2].Width = 80;
-                    this.Columns[3].Width = 85;
+                    this.Columns[1].Width = widthColumnExt;
+                    this.Columns[2].Width = widthColumnDate;
+                    this.Columns[3].Width = widthColumnSize;
                     this.Columns[0].Width = this.Size.Width - 30 -
                         (widthColumnExt + widthColumnDate + widthColumnSize);
                 }

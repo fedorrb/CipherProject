@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,8 +9,8 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CipherProject</RootNamespace>
-    <AssemblyName>CipherProject</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AssemblyName>EncryptEasy</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>locked.ico</ApplicationIcon>
     <FileUpgradeFlags>
@@ -29,15 +29,15 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <TargetCulture>en</TargetCulture>
-    <ProductName>Cipher Project</ProductName>
+    <ProductName>EncryptEasy</ProductName>
     <PublisherName>Fedorchuk Ruslan</PublisherName>
-    <CreateWebPageOnPublish>false</CreateWebPageOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +47,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -57,6 +58,8 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>AA42C7844D49AFCA9B75056FAF466F864BEC6FCE</ManifestCertificateThumbprint>
@@ -76,8 +79,7 @@
     <TargetZone>Custom</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject>CipherProject.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -136,12 +138,6 @@
     <Compile Include="PanelListView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Pass.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Pass.designer.cs">
-      <DependentUpon>Pass.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="ProgressWindow.cs">
       <SubType>Form</SubType>
@@ -159,15 +155,13 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MakeDir.resx">
       <DependentUpon>MakeDir.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Pass.resx">
-      <DependentUpon>Pass.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProgressWindow.resx">
       <DependentUpon>ProgressWindow.cs</DependentUpon>
@@ -188,6 +182,7 @@
     <EmbeddedResource Include="ViewForm.resx">
       <DependentUpon>ViewForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

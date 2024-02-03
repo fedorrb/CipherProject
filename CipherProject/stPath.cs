@@ -35,7 +35,7 @@ namespace CipherProject
         {
             string path = String.Empty;
             path = System.IO.Directory.GetCurrentDirectory();
-            path += @"\cipher.ini";
+            path += @"\EncryptEasy.ini";
             int elements = 0;
             if (System.IO.File.Exists(path))
             {
@@ -140,7 +140,7 @@ namespace CipherProject
                          };
             string path = String.Empty;
             path = Application.StartupPath;
-            path += @"\cipher.ini";
+            path += @"\EncryptEasy.ini";
             System.IO.File.WriteAllLines(path, s);
         }
     }

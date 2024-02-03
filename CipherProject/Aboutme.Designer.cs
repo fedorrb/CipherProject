@@ -36,9 +36,9 @@
             // button1
             // 
             this.button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button1.Location = new System.Drawing.Point(145, 213);
+            this.button1.Location = new System.Drawing.Point(493, 742);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(74, 32);
+            this.button1.Size = new System.Drawing.Size(114, 32);
             this.button1.TabIndex = 0;
             this.button1.Text = "OK";
             this.button1.UseVisualStyleBackColor = true;
@@ -46,26 +46,28 @@
             // 
             // textBox1
             // 
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBox1.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox1.Location = new System.Drawing.Point(0, 0);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(365, 207);
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(1101, 736);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = resources.GetString("textBox1.Text");
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Aboutme
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(365, 251);
+            this.ClientSize = new System.Drawing.Size(1101, 780);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Aboutme";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Aboutme";
+            this.Text = "About";
             this.ResumeLayout(false);
             this.PerformLayout();
 

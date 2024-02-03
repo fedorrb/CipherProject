@@ -6,12 +6,12 @@ using System.Resources;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("CipherProject")]
+[assembly: AssemblyTitle("EncryptEasy")]
 [assembly: AssemblyDescription("Encrypt/decrypt files")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("FRB")]
-[assembly: AssemblyProduct("CipherProject")]
-[assembly: AssemblyCopyright("Copyright © FRB 2011")]
+[assembly: AssemblyProduct("EncryptEasy")]
+[assembly: AssemblyCopyright("Copyright © FRB 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

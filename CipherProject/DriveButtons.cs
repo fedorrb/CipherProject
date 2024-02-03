@@ -65,7 +65,7 @@ namespace CipherProject
             buttonSizeX = leftDrivePanel.Size.Width / countDisk;
         }
         /// <summary>
-        /// ннарисовать кнопки дисков
+        /// нарисовать кнопки дисков
         /// </summary>
         public void DrawButtonDrive()
         {
@@ -98,7 +98,7 @@ namespace CipherProject
             btn.Location = new Point(posX, 0);
             btn.TabStop = false;
             btn.Text = disk;
-            btn.Font = new Font(FontFamily.GenericSansSerif, leftDrivePanel.Size.Height / 4);
+            //btn.Font = new Font(FontFamily.GenericSansSerif, leftDrivePanel.Size.Height / 4);
         }
 
         public void ResizeButton()
